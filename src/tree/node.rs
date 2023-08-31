@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use std::cmp::{max, Ordering};
 use std::fmt::{Debug, Display, Formatter, Result};
 use std::mem::swap;
 
@@ -21,6 +21,127 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
         }
     }
 
+    pub fn insert(&mut self, node: Self) {
+        // Determine where to insert
+        match (*self).cmp(&node) {
+            Ordering::Greater => {
+                if self.left.is_none() {
+                    self.left = Some(Box::new(node));
+                } else {
+                    self.left.as_mut().unwrap().insert(node);
+                }
+            }
+            Ordering::Less => {
+                if self.right.is_none() {
+                    self.right = Some(Box::new(node));
+                } else {
+                    self.right.as_mut().unwrap().insert(node);
+                }
+            }
+            Ordering::Equal => {}
+        }
+
+        self.balance();
+    }
+
+    pub fn exists(&self, value: T) -> bool {
+        match self.value.cmp(&value) {
+            Ordering::Greater => self.left.as_ref().map_or(false, |l| l.exists(value)),
+            Ordering::Less => self.right.as_ref().map_or(false, |r| r.exists(value)),
+            Ordering::Equal => true,
+        }
+    }
+
+    pub fn delete(&mut self, value: T) {
+        match self.value.cmp(&value) {
+            Ordering::Greater => {
+                if self.left.is_some() {
+                    if self.left.as_ref().unwrap().height > 1 {
+                        self.left.as_mut().unwrap().delete(value);
+                    } else {
+                        self.left.take();
+                    }
+                }
+            }
+            Ordering::Less => {
+                if self.right.is_some() {
+                    if self.right.as_ref().unwrap().height > 1 {
+                        self.right.as_mut().unwrap().delete(value);
+                    } else {
+                        self.right.take();
+                    }
+                }
+            }
+            Ordering::Equal => {
+                let left_height = self.left.as_ref().map_or(0, |l| l.height);
+                let right_height = self.right.as_ref().map_or(0, |r| r.height);
+
+                match left_height.cmp(&right_height) {
+                    Ordering::Less | Ordering::Equal => {
+                        let mut taken = self.right.as_mut().unwrap().take_leftmost();
+                        if taken.is_none() {
+                            taken = self.right.take();
+                        }
+                        let left = self.left.take();
+                        swap(self, taken.as_mut().unwrap());
+                        self.left = left;
+                    }
+                    Ordering::Greater => {
+                        let mut taken = self.left.as_mut().unwrap().take_rightmost();
+                        if taken.is_none() {
+                            taken = self.left.take();
+                        }
+                        let right = self.right.take();
+                        swap(self, taken.as_mut().unwrap());
+                        self.right = right;
+                    }
+                }
+            }
+        }
+
+        self.balance();
+    }
+
+    fn balance(&mut self) {
+        // Get heights
+        let left_height = self.left.as_ref().map_or(0, |l| l.height);
+        let right_height = self.right.as_ref().map_or(0, |r| r.height);
+
+        // Update height
+        self.height = 1 + max(left_height, right_height);
+
+        // Determine whether to rotate and direction
+        if left_height > right_height + 1 {
+            self.rotate_right();
+        } else if right_height > left_height + 1 {
+            self.rotate_left();
+        }
+    }
+
+    fn take_leftmost(&mut self) -> Option<Box<Self>> {
+        if let Some(l) = self.left.as_mut() {
+            if l.left.is_some() {
+                l.take_leftmost()
+            } else {
+                l.left.take()
+            }
+        } else {
+            None
+        }
+    }
+
+    fn take_rightmost(&mut self) -> Option<Box<Self>> {
+        if let Some(r) = self.right.as_mut() {
+            if r.right.is_some() {
+                r.take_rightmost()
+            } else {
+                r.right.take()
+            }
+        } else {
+            None
+        }
+    }
+
     pub fn rotate_right(&mut self) {
         if self.left.is_none() {
             return;
@@ -38,10 +159,8 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
         a.left = self.right.take();
 
         // 4. Attach A as right node of B
-        a.height -= 1;
+        a.height -= 2;
         self.right = Some(a);
-
-        self.height += 1;
     }
 
     pub fn rotate_left(&mut self) {
@@ -61,10 +180,8 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
         b.right = self.left.take();
 
         // 4. Attach B as left node of A
-        b.height -= 1;
+        b.height -= 2;
         self.left = Some(b);
-
-        self.height += 1;
     }
 }
 

@@ -1,18 +1,20 @@
 mod tree;
 
-use crate::tree::node::Node;
+use crate::tree::Tree;
 
 fn main() {
-    let node_r: Node<i32> = Node::new(6, None, None);
-    let node_ll: Node<i32> = Node::new(2, None, None);
-    let node_lr: Node<i32> = Node::new(4, None, None);
-    let node_l: Node<i32> = Node::new(3, Some(Box::new(node_ll)), Some(Box::new(node_lr)));
-    let mut node_root: Node<i32> = Node::new(5, Some(Box::new(node_l)), Some(Box::new(node_r)));
-    println!("Hello, world!");
+    let mut tree = Tree::<i32>::new();
 
-    println!("{:?}", node_root);
+    tree.insert(1);
+    tree.insert(2);
+    tree.insert(3);
+    tree.insert(4);
+    tree.insert(5);
+    tree.insert(6);
 
-    node_root.rotate_right();
+    tree.delete(2);
+    tree.delete(5);
 
-    println!("{:?}", node_root);
+    let res = tree.exists(6);
+    println!("{}", res);
 }
