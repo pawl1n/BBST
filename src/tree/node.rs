@@ -38,7 +38,10 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
         a.left = self.right.take();
 
         // 4. Attach A as right node of B
+        a.height -= 1;
         self.right = Some(a);
+
+        self.height += 1;
     }
 
     pub fn rotate_left(&mut self) {
@@ -58,7 +61,10 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
         b.right = self.left.take();
 
         // 4. Attach B as left node of A
+        b.height -= 1;
         self.left = Some(b);
+
+        self.height += 1;
     }
 }
 
