@@ -1,4 +1,3 @@
-use std::cmp::{max, Ordering};
 use std::cmp::{max, Ordering, Ordering::*};
 use std::fmt::{Debug, Display, Formatter, Result};
 use std::mem::swap;
