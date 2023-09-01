@@ -1,3 +1,4 @@
+mod test;
 mod tree;
 
 use crate::tree::Tree;

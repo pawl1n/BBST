@@ -7,7 +7,7 @@ pub struct Node<T: Ord> {
     pub value: T,
     pub left: Option<Box<Node<T>>>,
     pub right: Option<Box<Node<T>>>,
-    pub height: u32,
+    height: u32,
 }
 
 #[allow(dead_code)] // TODO: Remove after writing tests
@@ -19,6 +19,10 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
             right,
             height: 1,
         }
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
     }
 
     pub fn insert(&mut self, node: Self) {
@@ -114,7 +118,7 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
         let right_height = self.right.as_ref().map_or(0, |r| r.height);
 
         // Update height
-        self.height = 1 + max(left_height, right_height);
+        self.calculate_height(left_height, right_height);
 
         // Determine whether to rotate and direction
         if left_height > right_height + 1 {
@@ -124,12 +128,28 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
         }
     }
 
+    fn update_height(&mut self) {
+        let left_height = self.left.as_ref().map_or(0, |l| l.height);
+        let right_height = self.right.as_ref().map_or(0, |r| r.height);
+
+        self.calculate_height(left_height, right_height);
+    }
+
+    fn calculate_height(&mut self, left_height: u32, right_height: u32) {
+        self.height = 1 + max(left_height, right_height);
+    }
+
     fn take_leftmost(&mut self) -> Option<Box<Self>> {
         if let Some(l) = self.left.as_mut() {
             if l.left.is_some() {
                 l.take_leftmost()
             } else {
-                self.left.take()
+                let mut taken = self.left.as_mut().unwrap().right.take();
+                swap(&mut self.left, &mut taken);
+
+                self.update_height();
+
+                taken
             }
         } else {
             None
@@ -141,7 +161,12 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
             if r.right.is_some() {
                 r.take_rightmost()
             } else {
-                self.right.take()
+                let mut taken = self.right.as_mut().unwrap().left.take();
+                swap(&mut self.right, &mut taken);
+
+                self.update_height();
+
+                taken
             }
         } else {
             None
