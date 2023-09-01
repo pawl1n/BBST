@@ -135,4 +135,71 @@ mod test {
 
         assert_eq!(tree.root.as_ref().unwrap().height(), 2);
     }
+
+    #[test]
+    fn test_remove_unexisting_right() {
+        let mut tree: Tree<i32> = Tree::new();
+
+        tree.insert(1);
+        tree.insert(2);
+
+        tree.delete(3);
+
+        assert!(tree.exists(1));
+        assert!(tree.exists(2));
+    }
+
+    #[test]
+    fn test_remove_unexisting_left() {
+        let mut tree: Tree<i32> = Tree::new();
+
+        tree.insert(3);
+        tree.insert(2);
+
+        tree.delete(1);
+
+        assert!(tree.exists(3));
+        assert!(tree.exists(2));
+    }
+
+    #[test]
+    fn test_insert_many() {
+        let mut tree: Tree<i32> = Tree::new();
+
+        for i in 0..=100 {
+            tree.insert(i);
+        }
+
+        for i in (101..=200).rev() {
+            tree.insert(i);
+        }
+
+        assert_eq!(tree.root.as_ref().unwrap().height(), 8);
+
+        for i in 0..=200 {
+            assert!(tree.exists(i));
+        }
+    }
+
+    #[test]
+    fn test_delete_many() {
+        let mut tree: Tree<i32> = Tree::new();
+
+        for i in 0..=100 {
+            tree.insert(i);
+        }
+
+        tree.delete(101);
+        tree.delete(50);
+        tree.delete(25);
+        tree.delete(75);
+
+        assert_eq!(tree.root.as_ref().unwrap().height(), 7);
+
+        for i in 0..=100 {
+            if i != 101 && i != 50 && i != 25 && i != 75 {
+                assert!(tree.exists(i));
+            }
+        }
+    }
 }

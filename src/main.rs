@@ -3,6 +3,7 @@ mod tree;
 
 use crate::tree::Tree;
 
+#[cfg(not(tarpaulin_include))]
 fn main() {
     let mut input = String::new();
     let mut tree: Tree<i32> = Tree::new();

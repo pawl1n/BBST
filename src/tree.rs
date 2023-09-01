@@ -32,13 +32,11 @@ impl<T: Ord + Default + Display + Debug> Tree<T> {
     }
 
     pub fn delete(&mut self, value: T) {
-        if self.root.is_some() {
-            if self.root.as_ref().unwrap().height > 1 {
-                self.root.as_mut().unwrap().delete(value);
+        if let Some(root) = self.root.as_mut() {
+            if root.height() == 1 && root.value == value {
+                self.root = None;
             } else {
-                if self.root.as_ref().unwrap().value == value {
-                    self.root.take();
-                }
+                root.delete(value);
             }
         }
 

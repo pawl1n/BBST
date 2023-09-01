@@ -1,4 +1,5 @@
 use std::cmp::{max, Ordering};
+use std::cmp::{max, Ordering, Ordering::*};
 use std::fmt::{Debug, Display, Formatter, Result};
 use std::mem::swap;
 
@@ -28,21 +29,21 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
     pub fn insert(&mut self, node: Self) {
         // Determine where to insert
         match (*self).cmp(&node) {
-            Ordering::Greater => {
+            Greater => {
                 if self.left.is_none() {
                     self.left = Some(Box::new(node));
                 } else {
                     self.left.as_mut().unwrap().insert(node);
                 }
             }
-            Ordering::Less => {
+            Less => {
                 if self.right.is_none() {
                     self.right = Some(Box::new(node));
                 } else {
                     self.right.as_mut().unwrap().insert(node);
                 }
             }
-            Ordering::Equal => {}
+            Equal => {}
         }
 
         self.balance();
@@ -50,38 +51,38 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
 
     pub fn exists(&self, value: T) -> bool {
         match self.value.cmp(&value) {
-            Ordering::Greater => self.left.as_ref().map_or(false, |l| l.exists(value)),
-            Ordering::Less => self.right.as_ref().map_or(false, |r| r.exists(value)),
-            Ordering::Equal => true,
+            Greater => self.left.as_ref().map_or(false, |l| l.exists(value)),
+            Less => self.right.as_ref().map_or(false, |r| r.exists(value)),
+            Equal => true,
         }
     }
 
     pub fn delete(&mut self, value: T) {
         match self.value.cmp(&value) {
-            Ordering::Greater => {
-                if self.left.is_some() {
-                    if self.left.as_ref().unwrap().height > 1 {
-                        self.left.as_mut().unwrap().delete(value);
-                    } else {
+            Greater => {
+                if let Some(left) = self.left.as_mut() {
+                    if left.height > 1 {
+                        left.delete(value);
+                    } else if left.value == value {
                         self.left.take();
                     }
                 }
             }
-            Ordering::Less => {
-                if self.right.is_some() {
-                    if self.right.as_ref().unwrap().height > 1 {
-                        self.right.as_mut().unwrap().delete(value);
-                    } else {
+            Less => {
+                if let Some(right) = self.right.as_mut() {
+                    if right.height > 1 {
+                        right.delete(value);
+                    } else if right.value == value {
                         self.right.take();
                     }
                 }
             }
-            Ordering::Equal => {
+            Equal => {
                 let left_height = self.left.as_ref().map_or(0, |l| l.height);
                 let right_height = self.right.as_ref().map_or(0, |r| r.height);
 
                 match left_height.cmp(&right_height) {
-                    Ordering::Less | Ordering::Equal => {
+                    Less | Ordering::Equal => {
                         let mut right = self.right.take();
                         let left = self.left.take();
                         let mut taken = right.as_mut().unwrap().take_leftmost();
@@ -93,7 +94,7 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
                         }
                         self.left = left;
                     }
-                    Ordering::Greater => {
+                    Greater => {
                         let mut left = self.left.take();
                         let right = self.right.take();
                         let mut taken = left.as_mut().unwrap().take_rightmost();
@@ -180,7 +181,6 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
 
         // 1. Take B
         let mut b: Box<Self> = self.left.take().unwrap();
-        // println!("{:?}", self);
 
         // 2. Swap B with A
         swap(self, &mut b);
@@ -201,7 +201,6 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
 
         // 1. Take A
         let mut a: Box<Self> = self.right.take().unwrap();
-        // println!("{:?}", self);
 
         // 2. Swap A with B
         swap(self, &mut a);
