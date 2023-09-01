@@ -24,7 +24,7 @@ impl<T: Ord + Default + Display + Debug> Tree<T> {
             self.root.as_mut().unwrap().insert(node);
         }
 
-        println!("{:?}", self.root);
+        // println!("{:?}", self.root);
     }
 
     pub fn exists(&self, value: T) -> bool {
@@ -42,7 +42,7 @@ impl<T: Ord + Default + Display + Debug> Tree<T> {
             }
         }
 
-        println!("{:?}", self.root);
+        // println!("{:?}", self.root);
     }
 }
 

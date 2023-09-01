@@ -78,21 +78,27 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
 
                 match left_height.cmp(&right_height) {
                     Ordering::Less | Ordering::Equal => {
-                        let mut taken = self.right.as_mut().unwrap().take_leftmost();
-                        if taken.is_none() {
-                            taken = self.right.take();
-                        }
+                        let mut right = self.right.take();
                         let left = self.left.take();
-                        swap(self, taken.as_mut().unwrap());
+                        let mut taken = right.as_mut().unwrap().take_leftmost();
+                        if taken.is_none() {
+                            swap(self, right.as_mut().unwrap());
+                        } else {
+                            swap(self, taken.as_mut().unwrap());
+                            self.right = right;
+                        }
                         self.left = left;
                     }
                     Ordering::Greater => {
-                        let mut taken = self.left.as_mut().unwrap().take_rightmost();
-                        if taken.is_none() {
-                            taken = self.left.take();
-                        }
+                        let mut left = self.left.take();
                         let right = self.right.take();
-                        swap(self, taken.as_mut().unwrap());
+                        let mut taken = left.as_mut().unwrap().take_rightmost();
+                        if taken.is_none() {
+                            swap(self, left.as_mut().unwrap());
+                        } else {
+                            swap(self, taken.as_mut().unwrap());
+                            self.left = left;
+                        }
                         self.right = right;
                     }
                 }
@@ -123,7 +129,7 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
             if l.left.is_some() {
                 l.take_leftmost()
             } else {
-                l.left.take()
+                self.left.take()
             }
         } else {
             None
@@ -135,7 +141,7 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
             if r.right.is_some() {
                 r.take_rightmost()
             } else {
-                r.right.take()
+                self.right.take()
             }
         } else {
             None
