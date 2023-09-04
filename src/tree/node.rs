@@ -123,17 +123,13 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
         if left_height > right_height + 1 {
             if self.left.as_ref().unwrap().left.is_none() {
                 self.left.as_mut().unwrap().rotate_left();
-                self.rotate_right();
-            } else {
-                self.rotate_right();
             }
+            self.rotate_right();
         } else if right_height > left_height + 1 {
             if self.right.as_ref().unwrap().right.is_none() {
                 self.right.as_mut().unwrap().rotate_right();
-                self.rotate_left();
-            } else {
-                self.rotate_left();
             }
+            self.rotate_left();
         }
     }
 
