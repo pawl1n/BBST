@@ -10,7 +10,6 @@ pub struct Node<T: Ord> {
     height: u32,
 }
 
-#[allow(dead_code)] // TODO: Remove after writing tests
 impl<T: Ord + Default + Display + Debug> Node<T> {
     pub fn new(value: T, left: Option<Box<Node<T>>>, right: Option<Box<Node<T>>>) -> Self {
         Self {
@@ -81,7 +80,7 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
                 let right_height = self.right.as_ref().map_or(0, |r| r.height);
 
                 match left_height.cmp(&right_height) {
-                    Less | Ordering::Equal => {
+                    Less | Equal => {
                         let mut right = self.right.take();
                         let left = self.left.take();
                         let mut taken = right.as_mut().unwrap().take_leftmost();
@@ -122,9 +121,19 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
 
         // Determine whether to rotate and direction
         if left_height > right_height + 1 {
-            self.rotate_right();
+            if self.left.as_ref().unwrap().left.is_none() {
+                self.left.as_mut().unwrap().rotate_left();
+                self.rotate_right();
+            } else {
+                self.rotate_right();
+            }
         } else if right_height > left_height + 1 {
-            self.rotate_left();
+            if self.right.as_ref().unwrap().right.is_none() {
+                self.right.as_mut().unwrap().rotate_right();
+                self.rotate_left();
+            } else {
+                self.rotate_left();
+            }
         }
     }
 
@@ -187,10 +196,11 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
 
         // 3. Take E and make it a left node of A
         a.left = self.right.take();
+        a.update_height();
 
         // 4. Attach A as right node of B
-        a.height -= 2;
         self.right = Some(a);
+        self.update_height();
     }
 
     pub fn rotate_left(&mut self) {
@@ -207,10 +217,11 @@ impl<T: Ord + Default + Display + Debug> Node<T> {
 
         // 3. Take D and make it a right node of B
         b.right = self.left.take();
+        b.update_height();
 
         // 4. Attach B as left node of A
-        b.height -= 2;
         self.left = Some(b);
+        self.update_height();
     }
 }
 
