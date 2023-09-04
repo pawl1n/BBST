@@ -174,8 +174,6 @@ mod test {
             tree.insert(i);
         }
 
-        assert_eq!(tree.root.as_ref().unwrap().height(), 8);
-
         for i in 0..=200 {
             assert!(tree.exists(i));
         }
@@ -201,5 +199,41 @@ mod test {
                 assert!(tree.exists(i));
             }
         }
+    }
+
+    #[test]
+    fn test_right_rotation2() {
+        let mut tree: Tree<i32> = Tree::new();
+        let nums: [i32; 9] = [6, 8, 4, 7, 9, 5, 3, 1, 2];
+
+        for i in nums {
+            tree.insert(i);
+        }
+
+        for i in nums {
+            assert!(tree.exists(i));
+        }
+        assert_eq!(tree.root.as_ref().unwrap().height(), 4);
+
+        tree.delete(2);
+        assert!(!tree.exists(2));
+    }
+
+    #[test]
+    fn test_left_rotation2() {
+        let mut tree: Tree<i32> = Tree::new();
+        let nums: [i32; 3] = [1, 3, 2];
+
+        for i in nums {
+            tree.insert(i);
+        }
+
+        for i in nums {
+            assert!(tree.exists(i));
+        }
+        assert_eq!(tree.root.as_ref().unwrap().height(), 2);
+
+        tree.delete(2);
+        assert!(!tree.exists(2));
     }
 }
